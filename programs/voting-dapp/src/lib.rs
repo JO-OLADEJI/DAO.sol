@@ -1,9 +1,10 @@
+use anchor_lang::prelude::*;
+
 mod methods;
 mod others;
 mod state;
 
-use anchor_lang::prelude::*;
-use methods::create_poll::{execute, Initialize};
+use methods::create_poll::{execute, Initialize, *};
 #[allow(unused_imports)]
 use others::*;
 #[allow(unused_imports)]
