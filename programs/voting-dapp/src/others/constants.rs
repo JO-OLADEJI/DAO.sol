@@ -1,2 +1,6 @@
 pub const ANCHOR_SPACE_DISCRIMINATOR: usize = 8;
 pub const MIN_POLL_DURATION: u64 = 60 * 60 * 24;
+pub const MIN_POLL_DESC_CHAR: u64 = 16;
+pub const MAX_POLL_DESC_CHAR: u64 = 256;
+pub const MAX_POLL_OPTION_TITLE_CHAR: u64 = 16;
+pub const MAX_POLL_AUTHORIZED_VOTERS: u64 = 16;

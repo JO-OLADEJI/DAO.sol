@@ -1,18 +1,17 @@
 use crate::others::*;
 use crate::state::*;
 use anchor_lang::prelude::*;
-use constants::*;
 
 #[derive(Accounts)]
 #[instruction(poll_id: u64)]
-pub struct Initialize<'info> {
+pub struct InitializePoll<'info> {
     #[account(mut)]
-    pub signer: Signer<'info>,
+    pub admin: Signer<'info>,
 
     #[account(
         init,
-        payer = signer,
-        space = ANCHOR_SPACE_DISCRIMINATOR + PollState::INIT_SPACE,
+        payer = admin,
+        space = constants::ANCHOR_SPACE_DISCRIMINATOR + PollState::INIT_SPACE,
         seeds = [b"poll".as_ref(), poll_id.to_le_bytes().as_ref()],
         bump
     )]
@@ -22,29 +21,34 @@ pub struct Initialize<'info> {
 }
 
 pub fn execute(
-    ctx: Context<Initialize>,
+    ctx: Context<InitializePoll>,
     id: u64,
     desc: String,
     start: u64, // -> 0: initialize to current time
     duration: u64,
     is_public: bool,
+    voters: Option<Vec<Pubkey>>,
 ) -> Result<()> {
-    // panic if poll has been previously created
+    let adj_start_time: u64;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
+
+    // panic if poll already exists
     if ctx.accounts.poll_account.start_time != 0 {
         return Err(errors::PollError::AlreadyInitialized.into());
     }
 
-    // panic if poll start time is in the past
-    if start != 0 && start < (Clock::get().unwrap().unix_timestamp) as u64 {
+    if start == 0 {
+        adj_start_time = now;
+    } else if start >= now {
+        adj_start_time = start;
+    } else {
         return Err(errors::PollError::StartTimeExpired.into());
     }
 
-    // panic if description is too little
-    if desc.len() < 16 {
+    if desc.len() < constants::MIN_POLL_DESC_CHAR as usize {
         return Err(errors::PollError::DescUnderflow.into());
     }
 
-    // panic if duration is less than 24 hours (1 day)
     if duration < constants::MIN_POLL_DURATION {
         return Err(errors::PollError::DurationUnderflow.into());
     }
@@ -52,10 +56,13 @@ pub fn execute(
     msg!("Initializing & writing data to {:?}", ctx.program_id);
     ctx.accounts.poll_account.set_inner(PollState {
         id,
+        admin: ctx.accounts.admin.key(),
         description: desc,
-        start_time: start,
+        start_time: adj_start_time,
         duration,
         can_public_vote: is_public,
+        authorized_voters: voters,
+        options_index: 0,
     });
 
     Ok(())
