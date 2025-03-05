@@ -18,7 +18,7 @@ pub struct PollState {
     pub can_public_vote: bool,
 
     #[max_len(MAX_POLL_AUTHORIZED_VOTERS)]
-    pub authorized_voters: Option<Vec<Pubkey>>,
+    pub whitelisted_voters: Option<Vec<Pubkey>>,
 
     pub options_index: u64,
 }

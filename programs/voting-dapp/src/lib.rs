@@ -7,6 +7,7 @@ mod state;
 use methods::cast_vote::{CastVoteCalldata, *};
 use methods::create_poll::{InitializePollCalldata, *};
 use methods::create_poll_option::{InitializePollOptionsCalldata, *};
+use methods::whitelist::{WhitelistVotersCalldata, *};
 
 declare_id!("GMzRVSCFTemLNGjikvoGe8bmR1GJtyu2zL1VXDHs4YJb");
 
@@ -24,6 +25,14 @@ pub mod voting_dapp {
         voters: Option<Vec<Pubkey>>,
     ) -> Result<()> {
         return execute(ctx, id, desc, start, duration, is_public, voters);
+    }
+
+    pub fn whitelist_voters(
+        ctx: Context<WhitelistVotersCalldata>,
+        poll_id: u64,
+        voter_ids: Vec<Pubkey>,
+    ) -> Result<()> {
+        return authorize_voters(ctx, poll_id, voter_ids);
     }
 
     pub fn create_poll_option(

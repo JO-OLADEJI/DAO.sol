@@ -47,7 +47,7 @@ pub fn cast_vote(
     let voter = &mut ctx.accounts.voter_accout;
 
     if !poll.can_public_vote {
-        match &poll.authorized_voters {
+        match &poll.whitelisted_voters {
             Some(auth_voters) => {
                 for voter in auth_voters {
                     if voter.to_string() == ctx.accounts.voter.key().to_string() {

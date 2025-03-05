@@ -14,6 +14,15 @@ pub enum PollError {
 
     #[msg("Poll duration too small: 24 hours min!")]
     DurationUnderflow,
+
+    #[msg("Unauthorized to execute function!")]
+    Unauthorized,
+
+    #[msg("Whitelist is only available on private polls!")]
+    PollIsPublic,
+
+    #[msg("Whitelist voters exceeded. 16 PubKeys max!")]
+    WhitelistThresholdOverflow,
 }
 
 #[error_code]

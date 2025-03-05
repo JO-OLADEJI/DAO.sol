@@ -60,7 +60,7 @@ pub fn execute(
         start_time: adj_start_time,
         duration,
         can_public_vote: is_public,
-        authorized_voters: voters,
+        whitelisted_voters: voters,
         options_index: 0,
     });
 
