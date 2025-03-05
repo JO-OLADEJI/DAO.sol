@@ -27,7 +27,7 @@ pub fn execute(
     start: u64, // -> 0: initialize to current time
     duration: u64,
     is_public: bool,
-    voters: Option<Vec<Pubkey>>,
+    whitelist_voters: Option<Vec<Pubkey>>,
 ) -> Result<()> {
     let adj_start_time: u64;
     let now = Clock::get().unwrap().unix_timestamp as u64;
@@ -52,6 +52,18 @@ pub fn execute(
         return Err(errors::PollError::DurationUnderflow.into());
     }
 
+    match &whitelist_voters {
+        Some(voter_ids) => {
+            if is_public {
+                return Err(errors::PollError::PollIsPublic.into());
+            }
+            if voter_ids.len() > constants::MAX_POLL_AUTHORIZED_VOTERS as usize {
+                return Err(errors::PollError::WhitelistThresholdOverflow.into());
+            }
+        }
+        _ => (),
+    }
+
     msg!("Initializing & writing data to {:?}", ctx.program_id);
     ctx.accounts.poll_account.set_inner(PollState {
         id,
@@ -60,7 +72,7 @@ pub fn execute(
         start_time: adj_start_time,
         duration,
         can_public_vote: is_public,
-        whitelisted_voters: voters,
+        whitelisted_voters: whitelist_voters,
         options_index: 0,
     });
 
