@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 #[instruction(poll_id: u64)]
-pub struct InitializePoll<'info> {
+pub struct InitializePollCalldata<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
@@ -21,7 +21,7 @@ pub struct InitializePoll<'info> {
 }
 
 pub fn execute(
-    ctx: Context<InitializePoll>,
+    ctx: Context<InitializePollCalldata>,
     id: u64,
     desc: String,
     start: u64, // -> 0: initialize to current time
@@ -32,7 +32,6 @@ pub fn execute(
     let adj_start_time: u64;
     let now = Clock::get().unwrap().unix_timestamp as u64;
 
-    // panic if poll already exists
     if ctx.accounts.poll_account.start_time != 0 {
         return Err(errors::PollError::AlreadyInitialized.into());
     }

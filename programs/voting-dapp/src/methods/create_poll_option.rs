@@ -5,7 +5,7 @@ use crate::state::{PollOptionState, PollState};
 
 #[derive(Accounts)]
 #[instruction(poll_id: u64)]
-pub struct InitializePollOptions<'info> {
+pub struct InitializePollOptionsCalldata<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
@@ -23,19 +23,20 @@ pub struct InitializePollOptions<'info> {
         seeds = [b"poll_option".as_ref(), poll_id.to_le_bytes().as_ref(), poll_account.options_index.to_le_bytes().as_ref()],
         bump
     )]
-    pub option_account: Account<'info, PollOptionState>,
+    pub poll_option_account: Account<'info, PollOptionState>,
 
     pub system_program: Program<'info, System>,
 }
 
 pub fn init_option(
-    ctx: Context<InitializePollOptions>,
+    ctx: Context<InitializePollOptionsCalldata>,
     _poll_id: u64,
     option_name: String,
     option_desc: Option<String>,
 ) -> Result<()> {
-    // TODO: check that poll exists
     let poll = &mut ctx.accounts.poll_account;
+
+    // check that poll exists
     if poll.start_time == 0 {
         return Err(errors::PollOptionError::PollNotFound.into());
     }
@@ -55,7 +56,7 @@ pub fn init_option(
         _ => (),
     }
 
-    ctx.accounts.option_account.set_inner(PollOptionState {
+    ctx.accounts.poll_option_account.set_inner(PollOptionState {
         id: poll.options_index,
         value: option_name,
         description: option_desc,
