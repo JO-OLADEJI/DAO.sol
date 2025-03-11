@@ -9,18 +9,14 @@ pub struct InitializePollOptionsCalldata<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
-    #[account(
-        mut,
-        seeds = [b"poll".as_ref(), poll_id.to_le_bytes().as_ref()],
-        bump
-    )]
+    #[account(mut)]
     pub poll_account: Account<'info, PollState>,
 
     #[account(
         init,
         payer = admin,
         space = constants::ANCHOR_SPACE_DISCRIMINATOR + PollOptionState::INIT_SPACE,
-        seeds = [b"poll_option".as_ref(), poll_id.to_le_bytes().as_ref(), poll_account.options_index.to_le_bytes().as_ref()],
+        seeds = [b"poll-option-account".as_ref(), &poll_id.to_le_bytes(), &poll_account.options_index.to_le_bytes()],
         bump
     )]
     pub poll_option_account: Account<'info, PollOptionState>,
@@ -31,8 +27,8 @@ pub struct InitializePollOptionsCalldata<'info> {
 pub fn init_option(
     ctx: Context<InitializePollOptionsCalldata>,
     _poll_id: u64,
-    option_name: String,
-    option_desc: Option<String>,
+    poll_option_name: String,
+    poll_option_desc: Option<String>,
 ) -> Result<()> {
     let poll = &mut ctx.accounts.poll_account;
 
@@ -41,13 +37,13 @@ pub fn init_option(
         return Err(errors::PollOptionError::PollNotFound.into());
     }
 
-    if option_name.is_empty() {
+    if poll_option_name.is_empty() {
         return Err(errors::PollOptionError::EmptyOptionTitle.into());
-    } else if option_name.len() > 16 {
+    } else if poll_option_name.len() > 16 {
         return Err(errors::PollOptionError::OptionTitleOverflow.into());
     }
 
-    match &option_desc {
+    match &poll_option_desc {
         Some(desc) => {
             if desc.len() > constants::MAX_POLL_DESC_CHAR as usize {
                 return Err(errors::PollOptionError::OptionDescriptionOverflow.into());
@@ -58,8 +54,8 @@ pub fn init_option(
 
     ctx.accounts.poll_option_account.set_inner(PollOptionState {
         id: poll.options_index,
-        value: option_name,
-        description: option_desc,
+        value: poll_option_name,
+        description: poll_option_desc,
         count: 0,
     });
     poll.options_index += 1;

@@ -12,7 +12,7 @@ pub struct InitializePollCalldata<'info> {
         init,
         payer = admin,
         space = constants::ANCHOR_SPACE_DISCRIMINATOR + PollState::INIT_SPACE,
-        seeds = [b"poll".as_ref(), poll_id.to_le_bytes().as_ref()],
+        seeds = [b"poll-account".as_ref(), &poll_id.to_le_bytes()],
         bump
     )]
     pub poll_account: Account<'info, PollState>,
@@ -20,14 +20,14 @@ pub struct InitializePollCalldata<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn execute(
+pub fn init(
     ctx: Context<InitializePollCalldata>,
-    id: u64,
-    desc: String,
-    start: u64, // -> 0: initialize to current time
-    duration: u64,
-    is_public: bool,
-    whitelist_voters: Option<Vec<Pubkey>>,
+    poll_id: u64,
+    poll_desc: String,
+    poll_start: u64, // -> 0: initialize to current time
+    poll_duration: u64,
+    is_poll_public: bool,
+    whitelisted_voters: Option<Vec<Pubkey>>,
 ) -> Result<()> {
     let adj_start_time: u64;
     let now = Clock::get().unwrap().unix_timestamp as u64;
@@ -36,25 +36,25 @@ pub fn execute(
         return Err(errors::PollError::AlreadyInitialized.into());
     }
 
-    if start == 0 {
+    if poll_start == 0 {
         adj_start_time = now;
-    } else if start >= now {
-        adj_start_time = start;
+    } else if poll_start >= now {
+        adj_start_time = poll_start;
     } else {
         return Err(errors::PollError::StartTimeExpired.into());
     }
 
-    if desc.len() < constants::MIN_POLL_DESC_CHAR as usize {
+    if poll_desc.len() < constants::MIN_POLL_DESC_CHAR as usize {
         return Err(errors::PollError::DescUnderflow.into());
     }
 
-    if duration < constants::MIN_POLL_DURATION {
+    if poll_duration < constants::MIN_POLL_DURATION {
         return Err(errors::PollError::DurationUnderflow.into());
     }
 
-    match &whitelist_voters {
+    match &whitelisted_voters {
         Some(voter_ids) => {
-            if is_public {
+            if is_poll_public {
                 return Err(errors::PollError::PollIsPublic.into());
             }
             if voter_ids.len() > constants::MAX_POLL_AUTHORIZED_VOTERS as usize {
@@ -66,13 +66,13 @@ pub fn execute(
 
     msg!("Initializing & writing data to {:?}", ctx.program_id);
     ctx.accounts.poll_account.set_inner(PollState {
-        id,
+        id: poll_id,
+        description: poll_desc,
         admin: ctx.accounts.admin.key(),
-        description: desc,
         start_time: adj_start_time,
-        duration,
-        can_public_vote: is_public,
-        whitelisted_voters: whitelist_voters,
+        duration: poll_duration,
+        can_public_vote: is_poll_public,
+        whitelisted_voters,
         options_index: 0,
     });
 

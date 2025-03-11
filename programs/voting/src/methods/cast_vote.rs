@@ -4,29 +4,21 @@ use crate::others::*;
 use crate::state::*;
 
 #[derive(Accounts)]
-#[instruction(poll_id: u64, poll_option_id: u64)]
+#[instruction(poll_id: u64)]
 pub struct CastVoteCalldata<'info> {
     #[account(mut)]
     voter: Signer<'info>,
 
-    #[account(
-        seeds = [b"poll".as_ref(), poll_id.to_le_bytes().as_ref()],
-        bump
-    )]
     poll_account: Account<'info, PollState>,
 
-    #[account(
-        mut,
-        seeds = [b"poll_option".as_ref(), poll_id.to_le_bytes().as_ref(), poll_option_id.to_le_bytes().as_ref()],
-        bump
-    )]
+    #[account(mut)]
     poll_option_account: Account<'info, PollOptionState>,
 
     #[account(
         init,
         payer = voter,
         space = constants::ANCHOR_SPACE_DISCRIMINATOR + VoterState::INIT_SPACE,
-        seeds = [b"vote".as_ref(), poll_id.to_le_bytes().as_ref(), voter.key().as_ref()],
+        seeds = [b"voter-record".as_ref(), &poll_id.to_le_bytes(), voter.key().as_ref()],
         bump
     )]
     voter_accout: Account<'info, VoterState>,
@@ -34,11 +26,7 @@ pub struct CastVoteCalldata<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn cast_vote(
-    ctx: Context<CastVoteCalldata>,
-    _poll_id: u64,
-    _poll_option_id: u64,
-) -> Result<()> {
+pub fn init_vote(ctx: Context<CastVoteCalldata>, _poll_id: u64) -> Result<()> {
     let mut is_voter_authorized: bool = false;
     let now = Clock::get().unwrap().unix_timestamp as u64;
 
@@ -78,5 +66,6 @@ pub fn cast_vote(
 
     voter.has_voted = true;
     poll_option.count += 1;
+
     Ok(())
 }
