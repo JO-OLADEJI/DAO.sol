@@ -7,7 +7,7 @@ pub struct PollOptionState {
     pub id: u64,
 
     #[max_len(MAX_POLL_OPTION_TITLE_CHAR)]
-    pub value: String,
+    pub title: String,
 
     #[max_len(MAX_POLL_DESC_CHAR)]
     pub description: Option<String>,

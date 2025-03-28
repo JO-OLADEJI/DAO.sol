@@ -6,9 +6,6 @@ pub enum PollError {
     #[msg("Description length too low: 16 characters min!")]
     DescUnderflow,
 
-    #[msg("Poll with given ID already initialized!")]
-    AlreadyInitialized,
-
     #[msg("Poll start in the past!")]
     StartTimeExpired,
 
@@ -27,9 +24,6 @@ pub enum PollError {
 
 #[error_code]
 pub enum PollOptionError {
-    #[msg("Poll with ID not found!")]
-    PollNotFound,
-
     #[msg("Option Title can't be empty!")]
     EmptyOptionTitle,
 
