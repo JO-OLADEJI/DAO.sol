@@ -32,10 +32,6 @@ pub fn init(
     let adj_start_time: u64;
     let now = Clock::get().unwrap().unix_timestamp as u64;
 
-    if ctx.accounts.poll_account.start_time != 0 {
-        return Err(errors::PollError::AlreadyInitialized.into());
-    }
-
     if poll_start == 0 {
         adj_start_time = now;
     } else if poll_start >= now {

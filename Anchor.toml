@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-voting_dapp = "GLcBgVhph3aMDLSxQxGsRjvEvNTNGQd4tQjY2gp9zaug"
+voting_dapp = "6V2o2cBPFaa3ZFAipQgU1nGemSM6n4i2tkR5bzg7Z2M8"
 
 [registry]
 url = "https://api.apr.dev"
@@ -15,4 +15,4 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-node tests/**/*.ts"

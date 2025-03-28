@@ -9,7 +9,7 @@ use methods::create_poll::{InitializePollCalldata, *};
 use methods::create_poll_option::{InitializePollOptionsCalldata, *};
 use methods::whitelist::{WhitelistVotersCalldata, *};
 
-declare_id!("GLcBgVhph3aMDLSxQxGsRjvEvNTNGQd4tQjY2gp9zaug");
+declare_id!("6V2o2cBPFaa3ZFAipQgU1nGemSM6n4i2tkR5bzg7Z2M8");
 
 #[program]
 pub mod voting {
