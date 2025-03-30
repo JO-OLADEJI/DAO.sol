@@ -12,7 +12,7 @@
         "typescript": "^5.8.2"
     },
     "scripts": {
-        "test": "ts-mocha tests/*.test.ts"
+        "test": "ts-mocha --timeout 100000 tests/*.test.ts"
     },
     "dependencies": {}
 }

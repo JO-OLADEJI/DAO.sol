@@ -15,10 +15,10 @@ pub struct CastVoteCalldata<'info> {
     poll_option_account: Account<'info, PollOptionState>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = voter,
         space = constants::ANCHOR_SPACE_DISCRIMINATOR + VoterState::INIT_SPACE,
-        seeds = [b"voter-record".as_ref(), &poll_id.to_le_bytes(), voter.key().as_ref()],
+        seeds = [b"vote-account".as_ref(), &poll_id.to_le_bytes(), voter.key().as_ref()],
         bump
     )]
     voter_accout: Account<'info, VoterState>,

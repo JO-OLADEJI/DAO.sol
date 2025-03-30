@@ -4,7 +4,6 @@ import {
     SYSVAR_CLOCK_PUBKEY,
     LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { VotingProgramAccounts } from "./types";
 
 export const getCurrentTimestamp = async (
     connection: web3.Connection,
@@ -25,20 +24,35 @@ export const getDefaultSigner = (): web3.Keypair => {
     return signer;
 };
 
-export const getProgramPDA = (
-    type: VotingProgramAccounts,
-    programId: PublicKey,
-    pollId?: BN,
-    pollOptionName?: string,
-): [PublicKey, number] => {
+export const getPollPDA = (pollId: BN, programId: PublicKey) => {
     return PublicKey.findProgramAddressSync(
-        type === VotingProgramAccounts.Poll
-            ? [Buffer.from("poll-account"), bnToBuffer(pollId)]
-            : [
-                  Buffer.from("poll-option-account"),
-                  Buffer.from(pollOptionName!),
-                  bnToBuffer(pollId),
-              ],
+        [Buffer.from("poll-account"), bnToBuffer(pollId)],
+        programId,
+    );
+};
+
+export const getPollOptionPDA = (
+    pollId: BN,
+    pollOptionName: string,
+    programId: PublicKey,
+) => {
+    return PublicKey.findProgramAddressSync(
+        [
+            Buffer.from("poll-option-account"),
+            Buffer.from(pollOptionName!),
+            bnToBuffer(pollId),
+        ],
+        programId,
+    );
+};
+
+export const getPollVotePDA = (
+    pollId: BN,
+    voter: PublicKey,
+    programId: PublicKey,
+) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("vote-account"), bnToBuffer(pollId), voter.toBuffer()],
         programId,
     );
 };
